@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState } from "react";
 import { BuildTracklist, SpotifyPlaylistCreator } from "@/utils/spotifyPlaylist";
 import { useSpotifyOauth } from "@/app/(authPages)/oauth/client";
 
@@ -15,7 +15,12 @@ export function Form(): JSX.Element {
   const [playlistInfo, setPlaylistInfo] = useState<PlaylistInfo | null>(null);
   const [playlistCreator, setPlaylistCreator] = useState<SpotifyPlaylistCreator | null>(null);
   const [showNotification, setShowNotification] = useState<boolean>(false);
-  const { isAuthenticated, login } = useSpotifyOauth();
+  
+  const { isAuthenticated, login, logout }: { 
+    isAuthenticated: boolean; 
+    login: (authWindow: Window | null) => Promise<void>;
+    logout: () => Promise<void>;
+  } = useSpotifyOauth();
 
   const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -25,12 +30,11 @@ export function Form(): JSX.Element {
     setPlaylistInfo(null);
 
     try {
-      useEffect(() => {
-        if (!isAuthenticated) {
-          login(window);
-        }
-      }, [isAuthenticated]);
-      
+      if (!isAuthenticated) {
+        await login(typeof window !== 'undefined' ? window : null);
+        return;
+      }
+
       const buildTracklist = new BuildTracklist(phrase, true);
       const result = await buildTracklist.getTracksForPhrase();
 
