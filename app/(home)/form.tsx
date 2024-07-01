@@ -25,11 +25,12 @@ export function Form(): JSX.Element {
     setPlaylistInfo(null);
 
     try {
-      if (!isAuthenticated) {
-        await login();
-        return;
-      }
-
+      useEffect(() => {
+        if (!isAuthenticated) {
+          login(window);
+        }
+      }, [isAuthenticated]);
+      
       const buildTracklist = new BuildTracklist(phrase, true);
       const result = await buildTracklist.getTracksForPhrase();
 
