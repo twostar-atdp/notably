@@ -1,4 +1,3 @@
-import Navbar from "../(navbar)/navbar";
 
 export default function HomeLayout({
   children,

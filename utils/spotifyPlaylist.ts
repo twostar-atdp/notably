@@ -1,7 +1,8 @@
 // utils/spotifyPlaylist.ts
-import { searchTrack, generatePlaylist } from "./spotifyApi";
+import { searchTracks, generatePlaylist, unfollowPlaylist } from "./spotifyApi";
 
 const MAX_TRACK_LENGTH_WORDS = 10;
+const SEARCH_LIMIT = 50;
 
 export interface TrackInfo {
   name: string;
@@ -23,18 +24,10 @@ export class BuildTracklist {
     return phrase.replace(/[^a-zA-Z0-9 ]/g, '').toLowerCase();
   }
 
-  private async findTrackWithString(targetString: string): Promise<TrackInfo | null> {
+  private async findTracksWithString(targetString: string): Promise<TrackInfo[]> {
     const sanitizedTargetString = this.sanitizedPhrase(targetString);
-    const trackId = await searchTrack(sanitizedTargetString);
-    if (trackId) {
-      return {
-        name: sanitizedTargetString,
-        id: trackId,
-        artists: "",
-        albumArtURL: null
-      };
-    }
-    return null;
+    const tracks = await searchTracks(`track:"${sanitizedTargetString}"`, SEARCH_LIMIT);
+    return tracks.filter(track => this.sanitizedPhrase(track.name) === sanitizedTargetString);
   }
 
   async getTracksForPhrase(): Promise<{ isSuccess: boolean; resultTracks?: TrackInfo[]; checkedTracks: TrackInfo[] }> {
@@ -56,10 +49,12 @@ export class BuildTracklist {
 
       for (const phrase of phrasesToCheck) {
         const joinedPhrase = phrase.join(' ');
-        const track = await this.findTrackWithString(joinedPhrase);
-        if (track) {
+        const tracks = await this.findTracksWithString(joinedPhrase);
+        
+        for (const track of tracks) {
           checkedTracks.push(track);
           const phraseLength = phrase.length;
+          
           if (isPossible[i - phraseLength]) {
             const comparisonFactor = this.minimizeTrackCount ? 1 : -1;
             const currentDifference = wordCountInLatestPhrase[i] - phraseLength;
@@ -95,7 +90,44 @@ export class BuildTracklist {
       checkedTracks
     };
   }
+
+  generateSuggestions(tracks: TrackInfo[], originalPhrase: string, checkedTracks: TrackInfo[]): string[] {
+    const exactMatches = checkedTracks.filter(track => track);
+    const unmatchedTracks = tracks.filter(track => !exactMatches.includes(track));
+    const inputTokens = new Set(originalPhrase.toLowerCase().split(''));
+    let suggestions: string[] = [];
+  
+    if (exactMatches.length > 0) {
+      const basePhrase = exactMatches.map(track => track.name).join(" ");
+      suggestions.push(basePhrase);
+    }
+  
+    for (const track of unmatchedTracks) {
+      const trackTokens = new Set(track.name.toLowerCase().split(''));
+      const similarity = [...inputTokens].filter(token => trackTokens.has(token)).length;
+      if (similarity > 0) {
+        suggestions.push(track.name);
+      }
+    }
+  
+    if (suggestions.length > 3) {
+      suggestions.sort((a, b) => {
+        const aTokens = new Set(a.toLowerCase().split(''));
+        const bTokens = new Set(b.toLowerCase().split(''));
+        return [...bTokens].filter(token => inputTokens.has(token)).length - 
+               [...aTokens].filter(token => inputTokens.has(token)).length;
+      });
+      suggestions = suggestions.slice(0, 3);
+    }
+  
+    const finalSuggestions = suggestions.map(suggestion => {
+      return exactMatches.length > 0 ? `${exactMatches.map(track => track.name).join(" ")} ${suggestion}`.trim() : suggestion;
+    });
+  
+    return Array.from(new Set(finalSuggestions)).slice(0, 3);
+  }
 }
+
 
 export class SpotifyPlaylistCreator {
   private tracks: TrackInfo[];
@@ -109,18 +141,28 @@ export class SpotifyPlaylistCreator {
     this.playlistName = playlistName;
   }
 
-  async createPlaylist(): Promise<string> {
+  async createTemporaryPlaylist(): Promise<{ url: string; id: string }> {
     try {
       const trackIds = this.tracks.filter(track => track).map(track => track.id);
       if (trackIds.length === 0) {
         throw new Error("No tracks available to add to the playlist");
       }
-
       const playlistId = await generatePlaylist(this.playlistName, trackIds);
-      return `https://open.spotify.com/playlist/${playlistId}`;
+      return {
+        url: `https://open.spotify.com/playlist/${playlistId}`,
+        id: playlistId
+      };
     } catch (error) {
-      console.error("Error creating playlist:", error);
-      throw new Error("Failed to create playlist. Please try again later.");
+      console.error("Error creating temporary playlist:", error);
+      throw new Error("Failed to create temporary playlist. Please try again later.");
+    }
+  }
+
+  async removePlaylist(playlistId: string): Promise<void> {
+    try {
+      await unfollowPlaylist(playlistId);
+    } catch (error) {
+      console.error("Error removing temporary playlist:", error);
     }
   }
 }
