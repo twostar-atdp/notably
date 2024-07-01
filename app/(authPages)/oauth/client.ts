@@ -67,27 +67,27 @@ export function useSpotifyOauth() {
     if (!authWindow) {
       throw new Error("Auth window is not available");
     }
-
+  
     try {
       const authData = await pb.collection("users").authWithOAuth2({
         provider: "spotify",
         scopes: ['user-read-email', 'user-read-private', 'playlist-modify-public', 'playlist-modify-private'],
-        urlCallback: (url) => {
+        urlCallback: (url: string) => {  // Add the type annotation here
           authWindow.location.href = url;
         },
       });
-
+  
       console.log("Spotify auth successful:", authData);
       await storeUserData(authData);
       setIsAuthenticated(true);
-    
-    // Add a small delay before redirecting and closing the window
-    setTimeout(() => {
-      router.push("/");
-      authWindow.close();
-    }, 1000);
-
-  } catch (error) {
+      
+      // Add a small delay before redirecting and closing the window
+      setTimeout(() => {
+        router.push("/");
+        authWindow.close();
+      }, 1000);
+  
+    } catch (error) {
       console.error("Spotify OAuth error:", error);
       throw error;
     }
