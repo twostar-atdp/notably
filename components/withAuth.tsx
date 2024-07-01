@@ -24,7 +24,7 @@ export function WithAuth({ children }: { children: React.ReactNode }) {
   }, [router]);
 
   if (isAuthenticated === null) {
-    return <div>Loading...</div>; // Or a loading spinner
+    return <div>Loading...</div>; 
   }
 
   if (isAuthenticated === false) {

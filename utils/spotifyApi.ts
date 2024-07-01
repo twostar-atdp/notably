@@ -1,8 +1,4 @@
-// utils/spotifyApi.ts
 import { getSpotifyClient } from "@/app/lib/spotifyClient";
-
-
-
 
 export async function searchTracks(query: string, limit: number = 50) {
   try {
@@ -34,19 +30,6 @@ export async function generatePlaylist(name: string, trackIds: string[]) {
     console.error("Error generating playlist:", error);
     throw new Error("Spotify API error: Failed to generate playlist");
   }
-}
-
-
-export async function getPlaylistCoverImage(playlistId: string) {
-  try {
-    const spotify = await getSpotifyClient();
-    const images = await spotify.playlists.getPlaylistCoverImage(playlistId);
-    return images[0]?.url || null;
-  } catch (error) {
-    console.error("Error fetching playlist cover image:", error);
-    return null;
-  }
-
 }
 
 export async function unfollowPlaylist(playlistId: string) {

@@ -26,19 +26,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${poppins.className} bg-palette-background`}>
-        <ToastContainer
-          position="top-right"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable={false}
-          pauseOnHover
-          theme="colored"
-          toastClassName={"border-black border-[3px] shadow-[4px_4px_0_#000]"}
-        />
         <Navbar />
         {children}
       </body>

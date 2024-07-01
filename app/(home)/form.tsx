@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { useCallback, useState, useEffect } from "react";
 import { BuildTracklist, SpotifyPlaylistCreator } from "@/utils/spotifyPlaylist";
 import { useSpotifyOauth } from "@/app/(authPages)/oauth/client";
@@ -14,7 +14,7 @@ export function Form(): JSX.Element {
   const [error, setError] = useState<string | null>(null);
   const [playlistInfo, setPlaylistInfo] = useState<PlaylistInfo | null>(null);
   const [playlistCreator, setPlaylistCreator] = useState<SpotifyPlaylistCreator | null>(null);
-  const [status, setStatus] = useState<string | null>(null);
+  const [showNotification, setShowNotification] = useState<boolean>(false);
   const { isAuthenticated, login } = useSpotifyOauth();
 
   const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
@@ -53,18 +53,17 @@ export function Form(): JSX.Element {
     }
   }, [phrase, isAuthenticated, login]);
 
-
   const handleCopyLink = useCallback(() => {
     if (playlistInfo) {
       navigator.clipboard.writeText(playlistInfo.url)
         .then(() => {
-          setStatus("Playlist link copied!");
-          setTimeout(() => setStatus(null), 3000);
+          setShowNotification(true);
+          setTimeout(() => setShowNotification(false), 3000);
         })
         .catch(err => {
           console.error("Failed to copy link: ", err);
-          setStatus("Failed to copy link");
-          setTimeout(() => setStatus(null), 3000);
+          setError("Failed to copy link");
+          setTimeout(() => setError(null), 3000);
         });
     }
   }, [playlistInfo]);
@@ -75,19 +74,23 @@ export function Form(): JSX.Element {
         await playlistCreator.removePlaylist(playlistInfo.id);
         setPlaylistInfo(null);
         setPlaylistCreator(null);
-        setStatus("Playlist unfollowed successfully");
-        setTimeout(() => setStatus(null), 3000);
+        setError("Playlist unfollowed successfully");
+        setTimeout(() => setError(null), 3000);
       } catch (error) {
         console.error("Error unfollowing playlist:", error);
-        setStatus("Failed to unfollow playlist");
-        setTimeout(() => setStatus(null), 3000);
+        setError("Failed to unfollow playlist");
+        setTimeout(() => setError(null), 3000);
       }
     }
   }, [playlistCreator, playlistInfo]);
 
-
   return (
     <div className="flex flex-col items-center w-full max-w-xl mx-auto gap-4">
+      {showNotification && (
+        <div className="fixed top-0 left-0 right-0 bg-green-500 text-white py-2 px-4 text-center transition-opacity duration-300">
+          Link copied to clipboard!
+        </div>
+      )}
       <form
         onSubmit={handleSubmit}
         className="flex flex-col items-center w-full gap-4"
@@ -108,13 +111,8 @@ export function Form(): JSX.Element {
         </button>
       </form>
       {error && (
-        <div className="text-red-500 mt-2">
+        <div className="text-palette-text mt-2 p-2 bg-palette-tertiary border-2 border-palette-text">
           {error}
-        </div>
-      )}
-      {status && (
-        <div className="text-green-500 mt-2">
-          {status}
         </div>
       )}
       {playlistInfo && (

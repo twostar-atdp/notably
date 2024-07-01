@@ -1,80 +1,70 @@
 // app/(navbar)/navbar.tsx
-
 "use client";
-import Link from "next/link";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import PocketBase from "pocketbase";
+import { useState, useRef, useEffect } from "react";
+import { usePathname } from 'next/navigation';
 import WidthWrapper from "../(wrapper)/widthWrapper";
+import { useSpotifyOauth } from "../(authPages)/oauth/client";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const router = useRouter();
-  const pb = new PocketBase(process.env.NEXT_PUBLIC_POCKETBASE_URL);
+  const [isClient, setIsClient] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const { logout, isAuthenticated } = useSpotifyOauth();
+  const pathname = usePathname();
 
   useEffect(() => {
-    setIsAuthenticated(pb.authStore.isValid);
+    setIsClient(true);
   }, []);
 
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-
-  const handleAuthAction = async () => {
-    if (isAuthenticated) {
-      pb.authStore.clear();
-      setIsAuthenticated(false);
-      router.push('/login');
-    } else {
-      router.push('/login');
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
     }
-    toggleMenu();
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    await logout();
+    setIsMenuOpen(false);
   };
+
+  const showMenu = isClient && isAuthenticated && pathname !== '/login';
 
   return (
     <nav className="sticky top-0 z-[60] flex h-[80px] w-full flex-col items-center justify-center bg-palette-background md:h-[130px]">
       <WidthWrapper>
         <div className="flex h-full w-full flex-row items-center justify-between">
-          <Link href="/" className="relative">
-            <h1 className="text-3xl font-bold text-gray-900">Notably.</h1>
-          </Link>
-          {/* Hamburger menu button */}
-          <button
-            onClick={toggleMenu}
-            className="relative z-50 flex h-[50px] w-[50px] flex-col items-center justify-center"
-            aria-label="Toggle menu"
-          >
-            <span className={`hamburger-line ${isMenuOpen ? 'rotate-45 translate-y-[10px]' : ''}`}></span>
-            <span className={`hamburger-line ${isMenuOpen ? 'opacity-0' : ''}`}></span>
-            <span className={`hamburger-line ${isMenuOpen ? '-rotate-45 -translate-y-[10px]' : ''}`}></span>
-          </button>
+          <div className="relative" ref={menuRef}>
+            <button
+              onClick={() => showMenu && setIsMenuOpen(!isMenuOpen)}
+              className={`px-8 py-3 border-2 border-palette-text bg-palette-tertiary text-2xl font-bold text-palette-text ${
+                showMenu ? 'shadow-button transition-all duration-300 ease-out hover:shadow-buttonHover' : ''
+              }`}
+            >
+              Notably.
+            </button>
+            {showMenu && isMenuOpen && (
+              <div className="absolute top-full left-0 mt-2 w-48 rounded-md shadow-lg bg-palette-background border-2 border-palette-text">
+                <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full text-left px-4 py-2 text-palette-text hover:bg-palette-tertiary transition-colors duration-200"
+                    role="menuitem"
+                  >
+                    Logout
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </WidthWrapper>
-      {/* Menu overlay */}
-      <div
-        className={`fixed inset-0 bg-palette-accent transition-opacity duration-300 ease-in-out ${
-          isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
-      >
-        <div className="flex flex-col items-center justify-center h-full">
-          <Link
-            href="/"
-            className="mb-5 border-[3px] border-black bg-palette-tertiary p-[10px]"
-            onClick={toggleMenu}
-          >
-            <p className="text-xl font-medium text-palette-text">
-              Home
-            </p>
-          </Link>
-          <button
-            onClick={handleAuthAction}
-            className="mb-5 border-[3px] border-black bg-palette-tertiary p-[10px]"
-          >
-            <p className="text-xl font-medium text-palette-text">
-              {isAuthenticated ? "Logout" : "Login with Spotify"}
-            </p>
-          </button>
-        </div>
-      </div>
     </nav>
   );
 }

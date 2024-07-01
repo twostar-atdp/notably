@@ -16,26 +16,6 @@
   }
 }
 
-body {
-  --toastify-color-info: #252625;
-  --toastify-color-success: #3bbd58;
-  --toastify-color-error: #bd3b3b;
-  --toastify-font-family: "Poppins", sans-serif;
-
-  --toastify-text-color-info: #e1efdc;
-  --toastify-text-color-success: #e1efdc;
-  --toastify-text-color-warning: #e1efdc;
-  --toastify-text-color-error: #e1efdc;
-
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
-}
-
 .hamburger-line {
   width: 30px;
   height: 3px;

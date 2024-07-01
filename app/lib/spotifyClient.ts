@@ -58,11 +58,10 @@ async function refreshSpotifyToken(userId: string, refreshToken: string) {
 
     const newTokens = {
       spotify_access_token: data.access_token,
-      spotify_refresh_token: data.refresh_token || refreshToken, // Use new refresh token if provided, otherwise keep the old one
+      spotify_refresh_token: data.refresh_token || refreshToken,
       spotify_token_expiry: new Date(Date.now() + data.expires_in * 1000).toISOString()
     };
 
-    // Update the user record in PocketBase with the new tokens
     await pb.collection('users').update(userId, newTokens);
 
     return newTokens;
