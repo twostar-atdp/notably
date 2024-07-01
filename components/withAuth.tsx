@@ -19,9 +19,8 @@ export function WithAuth({ children }: { children: React.ReactNode }) {
         setIsAuthenticated(true);
       }
     };
-
     checkAuth();
-  }, [router]);
+  }, [router, pb.authStore.isValid]);
 
   if (isAuthenticated === null) {
     return <div>Loading...</div>; 
