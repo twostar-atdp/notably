@@ -1,0 +1,30 @@
+{
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2xsZWN0aW9uSWQiOiJfcGJfdXNlcnNfYXV0aF8iLCJleHAiOjE3MjEwMDAzNjcsImlkIjoieDZkejM2MHZyOWNvd3lvIiwidHlwZSI6ImF1dGhSZWNvcmQifQ.37MEIiXhdmq6rprKDl3SS-IINP6tNik1JXmof4l8rCk",
+    "model": {
+        "avatar": "",
+        "avatar_url": "https://scontent-ord5-2.xx.fbcdn.net/v/t39.30808-1/272977140_10226396689285253_4862345796437115646_n.jpg?stp=cp0_dst-jpg_p50x50&_nc_cat=102&ccb=1-7&_nc_sid=6738e8&_nc_ohc=39WLlwEjZIEQ7kNvgFtEIZw&_nc_ht=scontent-ord5-2.xx&edm=AP4hL3IEAAAA&oh=00_AYCP5fdFPRncP3vuMNhtbhQCsUB_vfboYI13ZiWCavZ2QA&oe=66874F30",
+        "collectionId": "_pb_users_auth_",
+        "collectionName": "users",
+        "country": "US",
+        "created": "2024-06-30 21:42:13.079Z",
+        "display_name": "Taylor Hickman",
+        "email": "",
+        "emailVisibility": false,
+        "followers_count": "16",
+        "href": "https://api.spotify.com/v1/users/1241536113",
+        "id": "x6dz360vr9cowyo",
+        "name": "Taylor Hickman",
+        "product": "premium",
+        "spotify_access_token": "BQDKp0lKVYbdQysga198GsrSB_fnnJylSMMIBqteUsK3o20kr9CFsp2DonpSQa-6K03EWMXGxcA4dBgk0OZvim5X7-uQQu6THYPOAdINxhGr1cRT-m8qnFnGhSdWv3BZ95EvLa6ZGsn_NTo4eAeGwqGooA90EWcDxV-1p0YNcGSr_gwCO3ciVBPFzVA7qBL37oudwHesNVkHZQHy9lIORpIDdO9tYlPTfelJy_uep7f4UkzOdW2XJLMxkAXY",
+        "spotify_email": "taylorhickman1@gmail.com",
+        "spotify_id": "1241536113",
+        "spotify_refresh_token": "AQB8-hJUwcLH6Mz-IthW_jiP_kBOC94VM7AfztSk7uZUNsRBR1HtSyM6NLyzO-xNvVgCzlRRGNUKJM2CJ4jx8RIAANvzuxbq87HEDy2a0pYmQg8tPN6WpjoK0cExdFelTH8",
+        "spotify_token_expiry": "2024-07-01 00:39:27.838Z",
+        "spotify_url": "https://open.spotify.com/user/1241536113",
+        "type": "user",
+        "updated": "2024-06-30 23:39:28.230Z",
+        "uri": "spotify:user:1241536113",
+        "username": "users14299",
+        "verified": true
+    }
+}
