@@ -10,18 +10,25 @@ export function SpotifyOauthButton() {
   const [pending, setPending] = useState(false);
   const { login } = useSpotifyOauth();
 
-  const handleAuth = async () => {
+  const handleAuth = () => {
     if (pending) return;
     setPending(true);
-    try {
-      await login();
-      toast.success("User logged in successfully");
-    } catch (error) {
-      console.error("Login error:", error);
-      toast.error("Login failed. Please try again.");
-    } finally {
-      setPending(false);
-    }
+
+    // Open a new window immediately
+    const authWindow = window.open('', '_blank');
+
+    login(authWindow)
+      .then(() => {
+        toast.success("User logged in successfully");
+      })
+      .catch((error) => {
+        console.error("Login error:", error);
+        toast.error("Login failed. Please try again.");
+        if (authWindow) authWindow.close();
+      })
+      .finally(() => {
+        setPending(false);
+      });
   };
 
   return (

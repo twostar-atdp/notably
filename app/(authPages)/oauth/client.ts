@@ -50,7 +50,7 @@ async function storeUserData(authData: any) {
 }
 
 export function useSpotifyOauth() {
-  const pb = useMemo(() => getPocketBase(), []); 
+  const pb = useMemo(() => getPocketBase(), []);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
 
@@ -63,17 +63,31 @@ export function useSpotifyOauth() {
     }
   }, [pb]);
 
-  const login = async () => {
+  const login = async (authWindow: Window | null) => {
+    if (!authWindow) {
+      throw new Error("Auth window is not available");
+    }
+
     try {
       const authData = await pb.collection("users").authWithOAuth2({
         provider: "spotify",
-        scopes: ['user-read-email', 'user-read-private', 'playlist-modify-public', 'playlist-modify-private']
+        scopes: ['user-read-email', 'user-read-private', 'playlist-modify-public', 'playlist-modify-private'],
+        urlCallback: (url) => {
+          authWindow.location.href = url;
+        },
       });
+
       console.log("Spotify auth successful:", authData);
       await storeUserData(authData);
       setIsAuthenticated(true);
+    
+    // Add a small delay before redirecting and closing the window
+    setTimeout(() => {
       router.push("/");
-    } catch (error) {
+      authWindow.close();
+    }, 1000);
+
+  } catch (error) {
       console.error("Spotify OAuth error:", error);
       throw error;
     }
